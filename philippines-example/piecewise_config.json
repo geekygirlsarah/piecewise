@@ -1,0 +1,62 @@
+{ 
+    "piecewise_version" : "1.0",
+    "database_uri" : "postgresql+psycopg2://postgres:@/piecewise",
+    "cache_table_name": "results",
+    "aggregations": [{
+        "name": "by_thai_province",
+        "statistics_table_name": "thailand_provinces",
+        "bins": [
+            { "type" : "spatial_join", "table" : "thailand_provinces", "geometry_column" : "wkb_geometry", "key" : "district", "join_custom_data" : true },
+            { "type" : "time_slices", "resolution" : "month" },
+            { "type" : "isp_bins", "maxmind_table" : "maxmind", 
+                "rewrites" : {
+		    "aerioconnect": ["aerioconnect"],
+		    "at&t": ["at&t services", "at&t mobility llc", "wayport"],
+                    "cablevision": ["cablevision systems", "csc holdings", "cablevision infrastructure", "cablevision corporate", "optimum online", "optimum wifi", "optimum network"],
+		    "cascasde link": ["cascasdelink inc"],
+                    "centurylink": ["qwest", "embarq", "centurylink", "centurytel"],
+		    "cequint": ["cequint"],
+		    "comcast": ["comcast cable communications"],
+		    "cox communications": ["cox communications inc."],
+		    "elauwit networks": ["elauwit"],
+		    "frontier": ["frontier communications of america"],
+		    "hughes": ["hughes network systems"],
+                    "level3": ["level 3 communications", "glbx"],
+		    "MDU Communications": ["mdu communications (usa)"],
+		    "northland cable": ["northland cable television inc."],
+		    "rainier connect": ["rainier connect"],
+		    "sprint": ["sprint"],
+		    "t-mobile": ["t-mobile usa"],
+                    "twc": ["time warner"],
+		    "visionary communications": ["visionary communications"], 
+		    "verizon": ["cellco partnership dba verizon wireless"],
+		    "wave": ["wave broadband", "broadstripe", "condointernet.net"],
+		    "windstream": ["windstream communications inc"],
+		    "wolfe": ["wolfenet"],
+		    "whidbey internet services": ["whidbey internet services"],
+		    "xo communciations": ["xo communications"]
+                } }
+        ],
+        "statistics": [
+            { "type" : "AverageRTT" },
+            { "type" : "MedianRTT" },
+            { "type" : "DownloadCount" },
+            { "type" : "AverageDownload" },
+            { "type" : "MedianDownload" },
+            { "type" : "UploadCount" },
+            { "type" : "AverageUpload" },
+            { "type" : "MedianUpload" }
+        ]
+    }],
+    "filters": [
+        { "type": "temporal", "after": "Aug 1 2015 00:00:00", "before" : "Jan 1 2050 00:00:00" },
+        { "type": "bbox", "bbox": [95,4.15,139.183,20.445] },
+        { "type": "raw", "query": "connection_spec.data_direction IS NOT NULL" },
+        { "type": "raw", "query": "web100_log_entry.is_last_entry == true" },
+        { "type": "raw", "query": "project == 0" },
+        { "type": "raw", "query": "(web100_log_entry.snap.HCThruOctetsAcked >= 8192 OR web100_log_entry.snap.HCThruOctetsReceived >= 8192)" },
+        { "type": "raw", "query": "(web100_log_entry.snap.State == 1 OR (web100_log_entry.snap.State >= 5 AND web100_log_entry.snap.State <= 11))" },
+        { "type": "raw", "query": "((web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) >= 9000000 OR web100_log_entry.snap.Duration >= 9000000)" },
+        { "type": "raw", "query": "((web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) < 3600000000 OR web100_log_entry.snap.Duration < 3600000000)" }
+    ]
+}

@@ -1,0 +1,15 @@
+---
+- name: Copy geo data to server
+  copy: src=worldwide_example/{{ item.src }} dest=/opt/bq2geojson/html/{{ item.dest }}
+  with_items:
+      - { src: countries.geo.json, dest: countries.geojson }
+      - { src: center.js, dest: js/center.js }
+- pip: name=ipaddress state=latest
+- name: Ingest world country borders to postgres
+  command: ogr2ogr -f PostgreSQL 'PG:user=postgres dbname=piecewise' -nln countries /opt/bq2geojson/html/countries.geojson
+
+- name: Install worldwide by country piecewise configuration
+  copy: src=worldwide_example/piecewise_config.json dest=/etc/piecewise/config.json
+- name: Restart uwsgi so piecewise config is detected
+  service: name=uwsgi state=restarted
+- command: python extra_data.py chdir=/opt/piecewise
