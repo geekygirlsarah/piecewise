@@ -1,6 +1,6 @@
 ---
 - name: Copy geo data to server
-  copy: src=baltimore_example/{{ item.src }} dest=/opt/bq2geojson/html/{{ item.dest }}
+  copy: src=baltimore_example/{{ item.src }} dest=/opt/{{ item.dest }}
   with_items:
       - { src: maryland_blkgrps_2014.json, dest: maryland_blkgrps_2014.json }
       - { src: maryland_blkgrps, dest: '' }
@@ -9,7 +9,7 @@
   copy: src=baltimore_example/extra_data.py dest=/opt/piecewise/
 - pip: name=ipaddress state=latest
 - name: Ingest census blocks to postgres
-  command: ogr2ogr -f PostgreSQL -t_srs EPSG:4326 -nln maryland_blkgrps -nlt MultiPolygon 'PG:user=postgres dbname=piecewise' /opt/bq2geojson/html/maryland_blkgrps/cb_2014_24_bg_500k.shp
+  command: ogr2ogr -f PostgreSQL -t_srs EPSG:4326 -nln maryland_blkgrps -nlt MultiPolygon 'PG:user=postgres dbname=piecewise' /opt/maryland_blkgrps/cb_2014_24_bg_500k.shp
 - name: Install baltimore piecewise configuration
   copy: src=baltimore_example/piecewise_config.json dest=/etc/piecewise/config.json
 - name: Restart uwsgi so piecewise config is detected
