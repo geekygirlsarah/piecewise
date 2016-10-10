@@ -2,7 +2,5 @@
 - hosts: all
   tasks:
     - include: system_tasks.yml
-      sudo: True
     - include: user_tasks.yml
     - include: kansascity_example/kansascity_tasks.yml
-      sudo: True
